@@ -1,2 +1,2 @@
-# Curso-Git-GitHub
-Archivos y directorios de practica usados durante el curso de Git y GitHub
+# Repositorio de practica JDBC
+Creando un CRUD con de JDBC
