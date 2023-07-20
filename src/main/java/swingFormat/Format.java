@@ -13,6 +13,10 @@ import javax.swing.JOptionPane;
 
 public class Format extends javax.swing.JFrame {
 
+    private Connection connection = null;
+    private PreparedStatement ps;
+    private ResultSet rs;
+
     public Format() {
         initComponents();
     }
@@ -58,17 +62,21 @@ public class Format extends javax.swing.JFrame {
 
         txtBuscar.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(45, 30, 25, 2);
+        gridBagConstraints.insets = new java.awt.Insets(40, 10, 20, 10);
         jPanel1.add(txtBuscar, gridBagConstraints);
 
         btnBuscar.setFont(new java.awt.Font("Calibri", 1, 18)); // NOI18N
         btnBuscar.setText("Buscar ID");
         btnBuscar.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnBuscar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBuscarActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
@@ -318,17 +326,28 @@ public class Format extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private Connection getConnection() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/jdbc2crud", "root", "faeavf44");
+        } catch (Exception e) {
+            System.out.println("Error, " + e);
+        }
+
+        return connection;
+    }
+
+    ;
+    
+    
     private void txtFechaNacimientoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFechaNacimientoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtFechaNacimientoActionPerformed
 
     private void btnInsertarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertarActionPerformed
-        Connection connection = null;
-        PreparedStatement ps;
-        ResultSet rs;
+
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/jdbc2crud", "root", "faeavf44");
+            connection = getConnection();
             ps = connection.prepareStatement("INSERT INTO personas (nombre, clave, domicilio, celular, correo, fecha_nacimiento, genero) VALUES (?,?,?,?,?,?,?)");
             ps.setString(1, txtNombre.getText());
             ps.setString(2, txtId.getText());
@@ -354,6 +373,27 @@ public class Format extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnInsertarActionPerformed
 
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        connection = getConnection();
+
+        try {
+            ps = connection.prepareStatement("SELECT * FROM personas WHERE clave = ?");
+            ps.setString(1, txtBuscar.getText());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                txtId.setText(rs.getString("clave"));
+                txtNombre.setText(rs.getString("nombre"));
+                txtDomicilio.setText(rs.getString("domicilio"));
+                txtCelular.setText(rs.getString("celular"));
+                txtCorreo.setText(rs.getString("correo"));
+                txtFechaNacimiento.setText(rs.getString("fecha_nacimiento"));
+                comboGenero.setSelectedItem(rs.getString("genero"));
+            }
+        } catch (Exception e) {
+            System.out.println("Error, " + e);
+        }
+    }//GEN-LAST:event_btnBuscarActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -368,16 +408,24 @@ public class Format extends javax.swing.JFrame {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
+
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Format.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Format.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Format.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Format.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Format.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Format.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Format.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Format.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
