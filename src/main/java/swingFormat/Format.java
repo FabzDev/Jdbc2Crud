@@ -9,14 +9,9 @@ import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import javax.swing.JOptionPane;
 
 public class Format extends javax.swing.JFrame {
-
 
     public Format() {
         initComponents();
@@ -334,22 +329,21 @@ public class Format extends javax.swing.JFrame {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/jdbc2crud", "root", "faeavf44");
-            ps = connection.prepareStatement("INSERT INTO personas (nombre, clave, domicilio, celular, correo, fecha_nacimiento, genero) VALUES ("
-                    + "'" + txtNombre.getText() + "'"
-                    + ", '" + txtId.getText() + "'"
-                    + ", '" + txtDomicilio.getText() + "'"
-                    + ", '" + txtCelular.getText() + "'"
-                    + ", '" + txtCorreo.getText() + "'"
-                    + ", '" + Date.valueOf(txtFechaNacimiento.getText()) + "'"
-                    + ", '" + comboGenero.getSelectedItem() + "'"
-                    + ");");
+            ps = connection.prepareStatement("INSERT INTO personas (nombre, clave, domicilio, celular, correo, fecha_nacimiento, genero) VALUES (?,?,?,?,?,?,?)");
+            ps.setString(1, txtNombre.getText());
+            ps.setString(2, txtId.getText());
+            ps.setString(3, txtDomicilio.getText());
+            ps.setString(4, txtCelular.getText());
+            ps.setString(5, txtCorreo.getText());
+            ps.setDate(6, Date.valueOf(txtFechaNacimiento.getText()));
+            ps.setString(7, (String) comboGenero.getSelectedItem());
 
             int result = ps.executeUpdate();
-            
-            if (result>0){
-                System.out.println("Registro guardado con exito");
-            }else {
-                System.out.println("Error al guardar el registro");
+
+            if (result > 0) {
+                JOptionPane.showMessageDialog(null, "Registro guardado con exito");
+            } else {
+                JOptionPane.showMessageDialog(null, "Error al guardar el registro");
             }
 
             connection.close();
