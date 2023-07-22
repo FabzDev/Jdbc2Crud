@@ -9,6 +9,10 @@ import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 public class Format extends javax.swing.JFrame {
@@ -19,6 +23,7 @@ public class Format extends javax.swing.JFrame {
 
     public Format() {
         initComponents();
+        txtHiddenId.setVisible(false);
     }
 
     /**
@@ -53,7 +58,7 @@ public class Format extends javax.swing.JFrame {
         btnEliminar = new javax.swing.JButton();
         btnLimpiar = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
+        txtHiddenId = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Crud JDBC");
@@ -262,6 +267,11 @@ public class Format extends javax.swing.JFrame {
         btnModificar.setText("Modificar");
         btnModificar.setAlignmentY(0.0F);
         btnModificar.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnModificar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModificarActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 8;
@@ -276,6 +286,11 @@ public class Format extends javax.swing.JFrame {
         btnEliminar.setText("Eliminar");
         btnEliminar.setAlignmentY(0.0F);
         btnEliminar.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 8;
@@ -289,6 +304,11 @@ public class Format extends javax.swing.JFrame {
         btnLimpiar.setText("Limpiar");
         btnLimpiar.setAlignmentY(0.0F);
         btnLimpiar.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnLimpiar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLimpiarActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 8;
@@ -310,7 +330,11 @@ public class Format extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(29, 30, 23, 2);
         jPanel1.add(jLabel1, gridBagConstraints);
-        jPanel1.add(filler1, new java.awt.GridBagConstraints());
+
+        txtHiddenId.setEditable(false);
+        txtHiddenId.setEnabled(false);
+        txtHiddenId.setName(""); // NOI18N
+        jPanel1.add(txtHiddenId, new java.awt.GridBagConstraints());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -370,7 +394,7 @@ public class Format extends javax.swing.JFrame {
         } catch (Exception ex) {
             System.out.println("Error, " + ex);
         }
-
+        limpiar();
     }//GEN-LAST:event_btnInsertarActionPerformed
 
     private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
@@ -381,6 +405,7 @@ public class Format extends javax.swing.JFrame {
             ps.setString(1, txtBuscar.getText());
             rs = ps.executeQuery();
             if (rs.next()) {
+                txtHiddenId.setText(rs.getString("id_persona"));
                 txtId.setText(rs.getString("clave"));
                 txtNombre.setText(rs.getString("nombre"));
                 txtDomicilio.setText(rs.getString("domicilio"));
@@ -394,6 +419,57 @@ public class Format extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnBuscarActionPerformed
 
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        connection = getConnection();
+        int updateResult = 0;
+        try {
+            
+            ps = connection.prepareStatement("UPDATE personas SET nombre=?, domicilio=?, celular=?, correo=?, fecha_nacimiento=?, genero=? WHERE id_persona=?;");
+            ps.setString(1, txtNombre.getText());
+            ps.setString(2, txtDomicilio.getText());
+            ps.setString(3, txtCelular.getText());
+            ps.setString(4, txtCorreo.getText());
+            ps.setDate(5, Date.valueOf(txtFechaNacimiento.getText()));
+            ps.setString(6, (String) comboGenero.getSelectedItem());
+            ps.setString(7, txtHiddenId.getText());
+            
+            updateResult = ps.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("Error, " + e);
+        }
+
+        if (updateResult > 0) {
+            JOptionPane.showMessageDialog(null, "Registro actualizado");
+        } else {
+            JOptionPane.showMessageDialog(null, "Error al actualizar registro");
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
+        limpiar();
+    }//GEN-LAST:event_btnLimpiarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        connection = getConnection();
+        int deleteResult=0;
+        try {
+            ps = connection.prepareStatement("DELETE FROM personas WHERE id_persona=?;");
+            ps.setString(1, txtHiddenId.getText());
+            deleteResult = ps.executeUpdate();
+            
+        } catch (Exception e) { 
+            System.out.println("Error, " + e);
+        }
+        
+        if (deleteResult == 2) {
+            JOptionPane.showMessageDialog(null, "Registro eliminado");
+        } else {
+            System.out.println(deleteResult);
+            JOptionPane.showMessageDialog(null, "Error al eliminar registro");
+        }
+        
+    }//GEN-LAST:event_btnEliminarActionPerformed
+           
     /**
      * @param args the command line arguments
      */
@@ -444,7 +520,6 @@ public class Format extends javax.swing.JFrame {
     private javax.swing.JButton btnLimpiar;
     private javax.swing.JButton btnModificar;
     private javax.swing.JComboBox<String> comboGenero;
-    private javax.swing.Box.Filler filler1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblCelular;
@@ -459,7 +534,20 @@ public class Format extends javax.swing.JFrame {
     private javax.swing.JTextField txtCorreo;
     private javax.swing.JTextField txtDomicilio;
     private javax.swing.JTextField txtFechaNacimiento;
+    private javax.swing.JTextField txtHiddenId;
     private javax.swing.JTextField txtId;
     private javax.swing.JTextField txtNombre;
     // End of variables declaration//GEN-END:variables
+
+    private void limpiar() {
+        txtBuscar.setText(null);
+        txtHiddenId.setText(null);
+        txtId.setText(null);
+        txtNombre.setText(null);
+        txtDomicilio.setText(null);
+        txtCelular.setText(null);
+        txtCorreo.setText(null);
+        txtFechaNacimiento.setText(null);
+        comboGenero.setSelectedIndex(0);
+    }
 }
